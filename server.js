@@ -31,3 +31,30 @@ app.post("/chat", async (req, res) => {
 });
 
 app.listen(3000, () => console.log("Server running"));
+const express = require("express");
+const app = express();
+
+app.use(express.json());
+
+// test route (browser check)
+app.get("/", (req, res) => {
+  res.send("NPC server is online");
+});
+
+// chat route (Roblox will use this)
+app.post("/chat", (req, res) => {
+  const message = req.body.message;
+
+  if (!message) {
+    return res.json({ reply: "I didn't receive anything." });
+  }
+
+  res.json({
+    reply: "You said: " + message
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
+});
