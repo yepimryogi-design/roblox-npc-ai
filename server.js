@@ -8,7 +8,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/chat", (req, res) => {
-  const message = req.body.message;
+  const message = req.body.message || "";
 
   res.json({
     reply: "You said: " + message
@@ -16,6 +16,4 @@ app.post("/chat", (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
-});
+app.listen(PORT, () => console.log("Running on " + PORT));
