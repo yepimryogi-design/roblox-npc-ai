@@ -1,5 +1,5 @@
 {
-  "name": "npc-server",
+  "name": "dazai-npc",
   "version": "1.0.0",
   "main": "server.js",
   "dependencies": {
