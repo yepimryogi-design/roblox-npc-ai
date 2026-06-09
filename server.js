@@ -11,8 +11,25 @@ app.post("/chat", (req, res) => {
   const message = req.body.message || "";
 
   res.json({
-    reply: "You said: " + message
-  });
+const prompt = `
+You are a Roblox NPC inside a game.
+
+Personality:
+- calm, slightly mysterious
+- short natural responses
+- never repeat the player's message
+- act like a real character, not a chatbot
+
+Player said: ${message}
+`;
+
+const response = await openai.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [
+    { role: "system", content: prompt },
+    { role: "user", content: message }
+  ]
+});  });
 });
 
 const PORT = process.env.PORT || 3000;
