@@ -59,15 +59,3 @@ Rules:
 
   } catch (err) {
     console.error("OPENAI ERROR:", err);
-
-    // fallback so Roblox NEVER gets broken responses
-    res.json({
-      reply: "Hm… something interrupted my thoughts."
-    });
-  }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("Dazai NPC running on port " + PORT);
-});
