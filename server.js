@@ -15,13 +15,11 @@ app.get("/", (req, res) => {
 });
 
 // MAIN CHAT ENDPOINT (Roblox uses this)
-app.post("/chat", async (req, res) => {
-  try {
-    const message = req.body.message;
-
-    if (!message) {
-      return res.json({ reply: "Say something." });
-    }
+app.post("/chat", (req, res) => {
+  res.json({
+    reply: "Server works: " + (req.body.message || "")
+  });
+});
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
