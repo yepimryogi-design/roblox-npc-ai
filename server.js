@@ -4,21 +4,23 @@ const OpenAI = require("openai");
 const app = express();
 app.use(express.json());
 
-// OpenAI setup (Render env var)
+// OpenAI setup (must exist in Render environment variables)
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Health check (Render uses this sometimes)
 app.get("/", (req, res) => {
-  res.send("NPC server online");
+  res.send("NPC server is running");
 });
 
+// MAIN CHAT ENDPOINT (Roblox uses this)
 app.post("/chat", async (req, res) => {
   try {
-    const message = (req.body.message || "").trim();
+    const message = req.body.message;
 
     if (!message) {
-      return res.json({ reply: "..." });
+      return res.json({ reply: "Say something." });
     }
 
     const completion = await openai.chat.completions.create({
@@ -28,18 +30,8 @@ app.post("/chat", async (req, res) => {
       messages: [
         {
           role: "system",
-          content: `
-You are a Roblox NPC.
-
-Personality:
-- calm, intelligent, slightly mysterious
-- playful but subtle (Dazai-like energy)
-- short responses (1–2 sentences max)
-- NEVER repeat the player's message
-- NEVER say "You said:"
-- act like you are inside a Roblox world
-- respond naturally like a real character
-          `
+          content:
+            "You are a Roblox NPC. You speak naturally, short replies (1–2 sentences), never repeat the user's message, and stay in character."
         },
         {
           role: "user",
@@ -48,16 +40,21 @@ Personality:
       ]
     });
 
-    const reply = completion.choices[0].message.content.trim();
+    const reply = completion.choices?.[0]?.message?.content;
 
-    res.json({ reply });
+    if (!reply) {
+      return res.json({ reply: "..." });
+    }
+
+    res.json({ reply: reply.trim() });
 
   } catch (err) {
     console.error("AI ERROR:", err);
-    res.json({ reply: "…" });
+    res.json({ reply: "AI error occurred." });
   }
 });
 
+// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("NPC server running on port " + PORT);
