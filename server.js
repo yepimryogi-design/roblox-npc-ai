@@ -59,3 +59,7 @@ Rules:
 
   } catch (err) {
     console.error("OPENAI ERROR:", err);
+catch (err) {
+  console.error(err);
+  res.json({ reply: "ERROR: check Render logs" });
+}
