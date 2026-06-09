@@ -4,13 +4,13 @@ const OpenAI = require("openai");
 const app = express();
 app.use(express.json());
 
-// OpenAI setup (Render env variable REQUIRED)
+// OpenAI setup (REQUIRED env var on Render)
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 app.get("/", (req, res) => {
-  res.send("Dazai NPC server is running");
+  res.send("Dazai NPC server is alive");
 });
 
 app.post("/chat", async (req, res) => {
@@ -18,12 +18,12 @@ app.post("/chat", async (req, res) => {
     const message = (req.body.message || "").trim();
 
     if (!message) {
-      return res.json({ reply: "..." });
+      return res.json({ reply: "…" });
     }
 
-    const response = await openai.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
-      temperature: 0.95,
+      temperature: 0.9,
       max_tokens: 80,
       messages: [
         {
@@ -31,15 +31,15 @@ app.post("/chat", async (req, res) => {
           content: `
 You are a Roblox NPC with the personality of Dazai Osamu.
 
-Personality:
-- calm, playful, slightly chaotic intelligence
-- speaks like he is always amused or bored
+Rules:
+- calm, playful, slightly mysterious tone
 - short replies (1–2 sentences max)
-- never repeat the player's message
-- sometimes teasing, sometimes poetic, never robotic
-- act like you exist inside a Roblox world
-- never say "As an AI"
-          `
+- NEVER repeat the user's message
+- NEVER output empty text
+- NEVER respond with "..."
+- act like you are inside a Roblox world
+- sometimes teasing, sometimes poetic, always natural
+`
         },
         {
           role: "user",
@@ -48,17 +48,22 @@ Personality:
       ]
     });
 
-    const reply = response.choices?.[0]?.message?.content;
+    let reply = completion?.choices?.[0]?.message?.content;
 
-    if (!reply) {
-      return res.json({ reply: "…" });
+    // HARD SAFETY: prevents "..." problem permanently
+    if (!reply || reply.trim().length === 0) {
+      reply = "…";
     }
 
     res.json({ reply: reply.trim() });
 
   } catch (err) {
-    console.error(err);
-    res.json({ reply: "…" });
+    console.error("OPENAI ERROR:", err);
+
+    // fallback so Roblox NEVER gets broken responses
+    res.json({
+      reply: "Hm… something interrupted my thoughts."
+    });
   }
 });
 
